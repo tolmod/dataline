@@ -15,7 +15,7 @@ import { useUpdateUserInfo } from "@/hooks";
 import { Spinner } from "../Spinner/Spinner";
 import { Input } from "@components/Catalyst/input";
 
-export function OpenAIKeyPopup() {
+export function GeminiKeyPopup() {
   const [isOpen, setIsOpen] = useState(true);
   const [apiKey, setApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
@@ -40,10 +40,10 @@ export function OpenAIKeyPopup() {
     }
 
     mutate({
-      openai_api_key: apiKey,
+      gemini_api_key: apiKey,
       sentry_enabled: sentryEnabled,
       analytics_enabled: analyticsEnabled,
-      ...(baseUrl && { openai_base_url: baseUrl }),
+      ...(baseUrl && { api_base_url: baseUrl }),
     });
   }
 
@@ -55,9 +55,9 @@ export function OpenAIKeyPopup() {
 
   return (
     <Alert open={isOpen} onClose={() => setIsOpen(true)} size="xl">
-      <AlertTitle>Configure OpenAI</AlertTitle>
+      <AlertTitle>Configure Google Gemini</AlertTitle>
       <AlertDescription>
-        To continue, please enter your OpenAI api key.
+        To continue, please enter your Google Gemini API key.
       </AlertDescription>
       <AlertBody>
         <MaskedInput
@@ -65,25 +65,17 @@ export function OpenAIKeyPopup() {
           value={apiKey || ""}
           onChange={setApiKey}
           onKeyUp={handleKeyPress}
-          placeholder="OpenAI API key"
+          placeholder="Gemini API key"
         />
       </AlertBody>
       <AlertDescription className="!text-xs">
-        Please setup your API key with{" "}
+        You can get your API key from{" "}
         <a
           className="underline"
           target="_blank"
-          href="https://help.openai.com/en/articles/8867743-assign-api-key-permissions"
+          href="https://aistudio.google.com/apikey"
         >
-          full permissions{" "}
-        </a>
-        to use DataLine. You can create one on the{" "}
-        <a
-          className="underline"
-          target="_blank"
-          href="https://platform.openai.com/api-keys"
-        >
-          OpenAI platform.
+          Google AI Studio.
         </a>
       </AlertDescription>
 
@@ -94,12 +86,11 @@ export function OpenAIKeyPopup() {
           onChange={(event) => setBaseUrl(event.target.value)}
           onKeyUp={handleKeyPress}
           className={"font-mono"}
-          placeholder="Base URL (Optional)"
+          placeholder="API Base URL (Optional)"
         />
       </AlertBody>
       <AlertDescription className="!text-xs">
-        Base URL path for API requests, leave blank if not using a proxy or
-        service emulator.
+        Base URL for API requests. Defaults to Google's Gemini endpoint. Leave blank unless using a custom proxy.
       </AlertDescription>
       <AlertBody>
         <div className="flex">

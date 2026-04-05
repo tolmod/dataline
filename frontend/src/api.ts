@@ -342,22 +342,22 @@ const updateAvatar = async (file: File) => {
   return response.data;
 };
 
-// Optional name or openai_api_key
+// Optional name or gemini_api_key
 export type UpdateUserInfoResult = ApiResponse<IUserInfo>;
 const updateUserInfo = async (options: {
   name?: string;
-  openai_api_key?: string;
+  gemini_api_key?: string;
   langsmith_api_key?: string;
-  openai_base_url?: string;
+  api_base_url?: string;
   sentry_enabled?: boolean;
   analytics_enabled?: boolean;
   hide_sql_preference?: boolean;
 }) => {
   const {
     name,
-    openai_api_key,
+    gemini_api_key,
     langsmith_api_key,
-    openai_base_url,
+    api_base_url,
     sentry_enabled,
     analytics_enabled,
     hide_sql_preference,
@@ -365,7 +365,7 @@ const updateUserInfo = async (options: {
   // send only the filled in fields
   const data: Partial<IUserInfo> = {
     ...(name && { name }),
-    ...(openai_api_key && { openai_api_key }),
+    ...(gemini_api_key && { gemini_api_key }),
     ...(sentry_enabled != null && { sentry_enabled }),
     ...(analytics_enabled != null && { analytics_enabled }),
     ...(hide_sql_preference != null && { hide_sql_preference }),
@@ -375,9 +375,9 @@ const updateUserInfo = async (options: {
     data.langsmith_api_key =
       langsmith_api_key === "" ? null : langsmith_api_key;
   }
-  if (openai_base_url !== undefined) {
+  if (api_base_url !== undefined) {
     // When deleting the base URL
-    data.openai_base_url = openai_base_url === "" ? null : openai_base_url;
+    data.api_base_url = api_base_url === "" ? null : api_base_url;
   }
   const response = await backendApi<UpdateUserInfoResult>({
     url: "/settings/info",

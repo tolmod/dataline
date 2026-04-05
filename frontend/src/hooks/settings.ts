@@ -151,10 +151,10 @@ export function useUpdateUserInfo(options = {}) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: {
-      openai_api_key?: string;
+      gemini_api_key?: string;
       name?: string;
       langsmith_api_key?: string;
-      openai_base_url?: string;
+      api_base_url?: string;
       sentry_enabled?: boolean;
       analytics_enabled?: boolean;
     }) => (await api.updateUserInfo(payload)).data,
