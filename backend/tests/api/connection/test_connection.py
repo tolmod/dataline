@@ -1,8 +1,12 @@
 import logging
 import pathlib
+import sqlite3
+from io import BytesIO
 
 import pytest
 from fastapi.testclient import TestClient
+from openpyxl import Workbook
+from pytest import MonkeyPatch
 
 from dataline.config import config
 from dataline.models.connection.schema import Connection
@@ -124,3 +128,55 @@ async def test_delete_connection(client: TestClient, dvdrental_connection: Conne
     response = client.get("/connections")
     data = response.json()["data"]
     assert len(data["connections"]) == 0
+
+
+@pytest.mark.asyncio
+async def test_connect_excel_file_with_blank_header_columns(
+    client: TestClient, monkeypatch: MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    monkeypatch.setattr(config, "data_directory", str(tmp_path))
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Employees"
+
+    sheet.cell(row=2, column=1, value="first_name")
+    sheet.cell(row=2, column=2, value="last_name")
+    sheet.cell(row=2, column=3, value="city")
+
+    sheet.cell(row=3, column=1, value="Ada")
+    sheet.cell(row=3, column=2, value="Lovelace")
+    sheet.cell(row=3, column=3, value="London")
+    sheet.cell(row=3, column=40, value="ignored")
+
+    file = BytesIO()
+    workbook.save(file)
+    file.seek(0)
+
+    response = client.post(
+        "/connect/file",
+        data={"type": "excel", "name": "Employee Upload"},
+        files={
+            "file": (
+                "employees.xlsx",
+                file.getvalue(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+        },
+    )
+
+    assert response.status_code == 200, response.json()
+
+    data = response.json()["data"]
+    file_path = data["dsn"].replace("sqlite:///", "")
+
+    conn = sqlite3.connect(file_path)
+    try:
+        columns = [row[1] for row in conn.execute("PRAGMA table_info(employees)")]
+        rows = conn.execute("SELECT first_name, last_name, city FROM employees").fetchall()
+    finally:
+        conn.close()
+        pathlib.Path(file_path).unlink(missing_ok=True)
+
+    assert columns == ["first_name", "last_name", "city"]
+    assert rows == [("Ada", "Lovelace", "London")]
