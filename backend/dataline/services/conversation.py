@@ -43,7 +43,7 @@ from dataline.services.llm_flow.llm_calls.conversation_title_generator import (
     conversation_title_generator_prompt,
 )
 from dataline.services.llm_flow.llm_calls.mirascope_utils import (
-    OpenAIClientOptions,
+    GeminiClientOptions,
     call,
 )
 from dataline.services.settings import SettingsService
@@ -79,16 +79,16 @@ class ConversationService:
             return "Untitled chat"
 
         user_details = await self.settings_service.get_model_details(session)
-        api_key = user_details.openai_api_key.get_secret_value()
-        base_url = user_details.openai_base_url
+        api_key = user_details.gemini_api_key.get_secret_value()
+        base_url = user_details.api_base_url
         first_message_content = conversation.messages[0].message.content
 
         try:
             title_generator_response = call(
-                "gpt-4o-mini",
+                "gemini-3.1-flash-lite-preview",
                 response_model=ConversationTitleGeneratorResponse,
                 prompt_fn=conversation_title_generator_prompt,
-                client_options=OpenAIClientOptions(api_key=api_key, base_url=base_url),
+                client_options=GeminiClientOptions(api_key=api_key, base_url=base_url),
             )(user_message=first_message_content)
 
             title = title_generator_response.title
@@ -161,10 +161,10 @@ class ConversationService:
             query=query,
             options=QueryOptions(
                 secure_data=secure_data,
-                openai_api_key=user_with_model_details.openai_api_key.get_secret_value(),  # type: ignore
-                openai_base_url=user_with_model_details.openai_base_url,
+                gemini_api_key=user_with_model_details.gemini_api_key.get_secret_value(),  # type: ignore
+                api_base_url=user_with_model_details.api_base_url,
                 langsmith_api_key=langsmith_api_key.get_secret_value() if langsmith_api_key else None,  # type: ignore
-                llm_model=user_with_model_details.preferred_openai_model,
+                llm_model=user_with_model_details.preferred_model,
             ),
             history=history,
         ):

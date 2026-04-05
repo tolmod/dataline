@@ -20,10 +20,10 @@ async def test_update_user_info_name(client: TestClient) -> None:
     assert response.json() == {
         "data": {
             "name": "John",
-            "openai_api_key": None,
-            "preferred_openai_model": None,
+            "gemini_api_key": None,
+            "preferred_model": None,
             "langsmith_api_key": None,
-            "openai_base_url": None,
+            "api_base_url": None,
             "sentry_enabled": True,
             "analytics_enabled": True,
             "hide_sql_preference": False,
@@ -47,31 +47,31 @@ async def test_update_user_info_long_name(client: TestClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_update_user_info_empty_openai_key(client: TestClient) -> None:
-    user_in = {"openai_api_key": ""}
+async def test_update_user_info_empty_gemini_key(client: TestClient) -> None:
+    user_in = {"gemini_api_key": ""}
     response = client.patch("/settings/info", json=user_in)
     assert response.status_code == 422
 
 
-@pytest.mark.skip(reason="OpenAI key validation is not implemented yet.")
-async def test_update_user_info_invalid_openai_key(client: TestClient) -> None:
-    user_in = {"openai_api_key": "invalid"}
+@pytest.mark.skip(reason="Gemini API key validation is not implemented yet.")
+async def test_update_user_info_invalid_gemini_key(client: TestClient) -> None:
+    user_in = {"gemini_api_key": "invalid"}
     response = client.patch("/settings/info", json=user_in)
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="OpenAI key is now as SecretStr, check the db for a change instead of using the client")
+@pytest.mark.skip(reason="Gemini API key is now a SecretStr, check the db for a change instead of using the client")
 @patch.object(OpenAIModels, "list")
-async def test_update_user_info_valid_openai_key(mock_openai_model_list: MagicMock, client: TestClient) -> None:
+async def test_update_user_info_valid_gemini_key(mock_openai_model_list: MagicMock, client: TestClient) -> None:
     mock_model = MagicMock()
-    mock_model.id = "gpt-3.5-turbo"
+    mock_model.id = "gemini-2.0-flash"
     mock_openai_model_list.return_value = [mock_model]
-    openai_key = "sk-Mioanowida"
-    user_in = {"openai_api_key": openai_key}
+    gemini_key = "sk-Mioanowida"
+    user_in = {"gemini_api_key": gemini_key}
     response = client.patch("/settings/info", json=user_in)
     assert response.status_code == 200, response.json()
-    assert response.json()["data"]["openai_api_key"] == openai_key
+    assert response.json()["data"]["gemini_api_key"] == gemini_key
     mock_openai_model_list.assert_called()
 
 
@@ -79,9 +79,9 @@ async def test_update_user_info_valid_openai_key(mock_openai_model_list: MagicMo
 @patch.object(OpenAIModels, "list")
 async def test_update_user_info_extra_fields_ignored(mock_openai_model_list: MagicMock, client: TestClient) -> None:
     mock_model = MagicMock()
-    mock_model.id = "gpt-3.5-turbo"
+    mock_model.id = "gemini-2.0-flash"
     mock_openai_model_list.return_value = [mock_model]
-    user_in = {"name": "John", "openai_api_key": "sk-1234", "extra": "extra"}
+    user_in = {"name": "John", "gemini_api_key": "sk-1234", "extra": "extra"}
     response = client.patch("/settings/info", json=user_in)
     assert response.status_code == 200
     assert "extra" not in response.json()["data"]
@@ -92,18 +92,18 @@ async def test_update_user_info_extra_fields_ignored(mock_openai_model_list: Mag
 @patch.object(OpenAIModels, "list")
 async def user_info(mock_openai_model_list: MagicMock, client: TestClient) -> dict[str, str]:
     mock_model = MagicMock()
-    mock_model.id = "gpt-3.5-turbo"
+    mock_model.id = "gemini-2.0-flash"
     mock_openai_model_list.return_value = [mock_model]
     user_in = {
         "name": "John",
-        "openai_api_key": "sk-asoiasdfl",
+        "gemini_api_key": "sk-asoiasdfl",
     }
     client.patch("/settings/info", json=user_in)
     return user_in
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="OpenAI key is now as SecretStr, check the db for a change instead of using the client")
+@pytest.mark.skip(reason="Gemini API key is now a SecretStr, check the db for a change instead of using the client")
 async def test_get_info(client: TestClient, user_info: dict[str, str]) -> None:
     # Send a GET request to the /settings/info endpoint
     response = client.get("/settings/info")
@@ -113,7 +113,7 @@ async def test_get_info(client: TestClient, user_info: dict[str, str]) -> None:
 
     # Check that the response body contains the expected data
     # Replace this with your actual assertions based on your application's logic
-    assert response.json()["data"] == {**user_info, "preferred_openai_model": "gpt-3.5-turbo"}
+    assert response.json()["data"] == {**user_info, "preferred_model": "gemini-2.0-flash"}
 
 
 @pytest.mark.asyncio

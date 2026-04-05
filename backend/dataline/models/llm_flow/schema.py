@@ -13,8 +13,8 @@ from dataline.repositories.result import ResultRepository
 
 
 class QueryOptions(BaseModel):
-    openai_api_key: SecretStr
-    openai_base_url: str | None = None
+    gemini_api_key: SecretStr
+    api_base_url: str | None = None
     langsmith_api_key: SecretStr | None = None
     llm_model: str
     secure_data: bool = False

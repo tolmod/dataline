@@ -5,7 +5,7 @@ import {
 } from "@components/Catalyst/alert";
 import { Outlet } from "@tanstack/react-router";
 import { Sidebar } from "./Sidebar";
-import { OpenAIKeyPopup } from "../Settings/OpenAIKeyPopup";
+import { GeminiKeyPopup } from "../Settings/GeminiKeyPopup";
 import { Spinner } from "../Spinner/Spinner";
 import {
   useGetBackendStatus,
@@ -97,8 +97,8 @@ export const Main = () => {
     return <LoadingScreen />;
   }
 
-  /** If the user has not set up their OpenAI API key, show a popup to do that */
-  if (profile?.openai_api_key) {
+  /** If the user has not set up their Google Gemini API key, show a popup to do that */
+  if (profile?.gemini_api_key) {
     return (
       <div className="w-full bg-gray-900">
         <Sidebar></Sidebar>
@@ -110,7 +110,7 @@ export const Main = () => {
   } else {
     return (
       <div>
-        <OpenAIKeyPopup />
+        <GeminiKeyPopup />
       </div>
     );
   }

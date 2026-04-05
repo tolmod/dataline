@@ -5,13 +5,20 @@ from mirascope.core.base import BaseMessageParam
 from openai import OpenAI
 from pydantic import BaseModel
 
+from dataline.config import config
 
-class OpenAIClientOptions(BaseModel):
+
+class GeminiClientOptions(BaseModel):
     api_key: str
     base_url: str | None = None
 
 
-AvailableModels = Literal["gpt-3.5-turbo"] | Literal["gpt-4o-mini"]
+AvailableModels = (
+    Literal["gemini-3.1-pro-preview"]
+    | Literal["gemini-3.1-flash-lite-preview"]
+    | Literal["gemini-2.0-flash"]
+    | Literal["gemini-2.0-flash-lite"]
+)
 
 _T = TypeVar("_T", bound=BaseModel)
 P = ParamSpec("P")
@@ -21,12 +28,14 @@ def call(
     model: AvailableModels,
     response_model: type[_T],
     prompt_fn: Callable[P, list[BaseMessageParam]],
-    client_options: OpenAIClientOptions,
+    client_options: GeminiClientOptions,
 ) -> Callable[P, _T]:
-    # Only openai supported for now, just use that
     return openai.call(
         model=model,
         response_model=response_model,
         json_mode=True,
-        client=OpenAI(api_key=client_options.api_key, base_url=client_options.base_url),
+        client=OpenAI(
+            api_key=client_options.api_key,
+            base_url=client_options.base_url or config.default_base_url,
+        ),
     )(prompt_fn)

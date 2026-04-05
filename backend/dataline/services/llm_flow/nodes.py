@@ -7,6 +7,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.graph import END
 from openai import AuthenticationError, RateLimitError
 
+from dataline.config import config
 from dataline.errors import UserFacingError
 from dataline.models.llm_flow.schema import QueryResultSchema
 from dataline.services.llm_flow.toolkit import (
@@ -51,8 +52,8 @@ class CallModelNode(Node):
         # TODO: Consider replacing with mirascope
         model = ChatOpenAI(
             model=state.options.llm_model,
-            base_url=state.options.openai_base_url,
-            api_key=state.options.openai_api_key,
+            base_url=state.options.api_base_url or config.default_base_url,
+            api_key=state.options.gemini_api_key,
             temperature=0,
             streaming=True,
         )
@@ -67,10 +68,10 @@ class CallModelNode(Node):
             response = model.invoke(last_n_messages)
         except RateLimitError as e:
             body = cast(dict, e.body)
-            raise UserFacingError(body.get("message", "OpenAI API rate limit exceeded"))
+            raise UserFacingError(body.get("message", "Gemini API rate limit exceeded"))
         except AuthenticationError as e:
             body = cast(dict, e.body)
-            raise UserFacingError(body.get("message", "OpenAI API key rejected"))
+            raise UserFacingError(body.get("message", "Gemini API key rejected"))
         except Exception as e:
             raise UserFacingError(str(e))
 

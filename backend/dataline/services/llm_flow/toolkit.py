@@ -36,7 +36,7 @@ from dataline.services.llm_flow.llm_calls.chart_generator import (
     generate_chart_prompt,
 )
 from dataline.services.llm_flow.llm_calls.mirascope_utils import (
-    OpenAIClientOptions,
+    GeminiClientOptions,
     call,
 )
 from dataline.services.llm_flow.utils import DatalineSQLDatabase as SQLDatabase
@@ -514,12 +514,12 @@ class ChartGeneratorTool(StateUpdaterTool):
         chart_type = ChartType[args["chart_type"]]
 
         generated_chart = call(
-            "gpt-3.5-turbo",
+            "gemini-3.1-flash-lite-preview",
             response_model=GeneratedChart,
             prompt_fn=generate_chart_prompt,
-            client_options=OpenAIClientOptions(
-                api_key=state.options.openai_api_key.get_secret_value(),
-                base_url=state.options.openai_base_url,
+            client_options=GeminiClientOptions(
+                api_key=state.options.gemini_api_key.get_secret_value(),
+                base_url=state.options.api_base_url,
             ),
         )(
             chart_type=chart_type,

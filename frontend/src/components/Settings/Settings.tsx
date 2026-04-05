@@ -164,30 +164,29 @@ export default function Account() {
                       htmlFor="current-password"
                       className="block text-md font-medium leading-6 text-white"
                     >
-                      OpenAI API Key
+                      Google Gemini API Key
                     </label>
                     <div className="mt-2">
                       <MaskedInput
-                        value={userInfo?.openai_api_key || ""}
+                        value={userInfo?.gemini_api_key || ""}
                         autoFocus={false}
                         onChange={(value) =>
                           setUserInfo((prevUserInfo) => ({
                             ...prevUserInfo!,
-                            openai_api_key: value,
+                            gemini_api_key: value,
                           }))
                         }
                       />
                     </div>
                     <p className="text-xs sm:text-sm text-gray-400 pt-2">
-                      Please setup your API key with{" "}
+                      Please get your API key from{" "}
                       <a
                         className="underline"
                         target="_blank"
-                        href="https://help.openai.com/en/articles/8867743-assign-api-key-permissions"
+                        href="https://aistudio.google.com/apikey"
                       >
-                        full permissions{" "}
+                        Google AI Studio.
                       </a>
-                      to use DataLine.
                     </p>
                   </div>
 
@@ -196,7 +195,7 @@ export default function Account() {
                       htmlFor="base-url"
                       className="block text-md font-medium leading-6 text-white"
                     >
-                      OpenAI Base URL
+                      API Base URL
                     </label>
                     <div className="mt-2 mr-9 sm:mr-11">
                       <Input
@@ -207,16 +206,15 @@ export default function Account() {
                         onChange={(event) =>
                           setUserInfo((prevUserInfo) => ({
                             ...prevUserInfo!,
-                            openai_base_url: event.target.value,
+                            api_base_url: event.target.value,
                           }))
                         }
-                        value={userInfo?.openai_base_url || ""}
+                        value={userInfo?.api_base_url || ""}
                         className="font-mono"
                       />
                     </div>
                     <p className="text-xs sm:text-sm text-gray-400 pt-2">
-                      Base URL path for API requests, leave blank if not using a
-                      proxy or service emulator.
+                      Base URL for API requests. Defaults to Google's Gemini endpoint. Leave blank unless using a custom proxy.
                     </p>
                   </div>
 
