@@ -1,3 +1,12 @@
+---
+title: DataLine
+emoji: 📊
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7377
+pinned: false
+---
 
 <p align="center">
     <strong>💬 Chat with your data using natural language 📊</strong>
