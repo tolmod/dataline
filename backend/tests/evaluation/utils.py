@@ -41,7 +41,7 @@ def evaluate_message_content(
     test_case = LLMTestCase(input=query, actual_output=generated_message)
     # don't really care about eval name
     correctness_metric = GEval(
-        name="Metric", model="gpt-3.5-turbo", evaluation_steps=eval_steps, evaluation_params=eval_params
+        name="Metric", model="gemini-2.0-flash-lite", evaluation_steps=eval_steps, evaluation_params=eval_params
     )
 
     correctness_metric.measure(test_case)

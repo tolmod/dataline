@@ -19,12 +19,13 @@ from dataline.sentry import opt_out_of_sentry, setup_sentry
 logger = logging.getLogger(__name__)
 
 
-def model_exists(openai_api_key: SecretStr | str, model: str, base_url: str | None = None) -> bool:
-    api_key = openai_api_key.get_secret_value() if isinstance(openai_api_key, SecretStr) else openai_api_key
+def model_exists(gemini_api_key: SecretStr | str, model: str, base_url: str | None = None) -> bool:
+    api_key = gemini_api_key.get_secret_value() if isinstance(gemini_api_key, SecretStr) else gemini_api_key
+    effective_base_url = base_url or config.default_base_url
     try:
-        models = openai.OpenAI(api_key=api_key, base_url=base_url).models.list()
+        models = openai.OpenAI(api_key=api_key, base_url=effective_base_url).models.list()
     except openai.AuthenticationError as e:
-        raise ValueError("Invalid OpenAI Key") from e
+        raise ValueError("Invalid Gemini API Key") from e
     return model in {model.id for model in models}
 
 
@@ -83,11 +84,11 @@ class SettingsService:
         if user_info is None:
             # Create user with data
             user_create = UserCreate.model_construct(**data.model_dump(exclude_unset=True))
-            if user_create.openai_api_key and user_create.preferred_openai_model is None:
-                user_create.preferred_openai_model = (
+            if user_create.gemini_api_key and user_create.preferred_model is None:
+                user_create.preferred_model = (
                     config.default_model
-                    if model_exists(user_create.openai_api_key, config.default_model, user_create.openai_base_url)
-                    else "gpt-3.5-turbo"
+                    if model_exists(user_create.gemini_api_key, config.default_model, user_create.api_base_url)
+                    else "gemini-2.0-flash"
                 )
             user = await self.user_repo.create(session, user_create)
             if data.sentry_enabled:  # by default, Sentry is off if no user in the db
@@ -96,20 +97,16 @@ class SettingsService:
             # Update user with data
             user_update = UserUpdate.model_construct(**data.model_dump(exclude_unset=True))
             base_url = (
-                user_update.openai_base_url
-                if "openai_base_url" in user_update.model_fields_set
-                else user_info.openai_base_url
+                user_update.api_base_url if "api_base_url" in user_update.model_fields_set else user_info.api_base_url
             )
-            if user_update.openai_api_key:
-                key_to_check = user_update.openai_api_key
-                model_to_check = (
-                    user_update.preferred_openai_model or user_info.preferred_openai_model or config.default_model
-                )
+            if user_update.gemini_api_key:
+                key_to_check = user_update.gemini_api_key
+                model_to_check = user_update.preferred_model or user_info.preferred_model or config.default_model
                 if not model_exists(key_to_check, model_to_check, base_url):
                     raise Exception(f"model {model_to_check} not accessible with current key")
-            elif user_update.preferred_openai_model and user_info.openai_api_key:
-                if not model_exists(user_info.openai_api_key, user_update.preferred_openai_model, base_url):
-                    raise Exception(f"model {user_update.preferred_openai_model} not accessible with current key")
+            elif user_update.preferred_model and user_info.gemini_api_key:
+                if not model_exists(user_info.gemini_api_key, user_update.preferred_model, base_url):
+                    raise Exception(f"model {user_update.preferred_model} not accessible with current key")
             should_update_sentry_preference = (
                 data.sentry_enabled is not None and user_info.sentry_enabled != data.sentry_enabled
             )  # Needed before updating the user
@@ -134,8 +131,8 @@ class SettingsService:
         if user_info is None:
             raise NotFoundError("No user found. Please setup your application.")
 
-        if not user_info.openai_api_key:
-            raise Exception("OpenAI key not setup. Please setup your application.")
+        if not user_info.gemini_api_key:
+            raise Exception("Gemini API key not setup. Please setup your application.")
 
-        user_info.preferred_openai_model = user_info.preferred_openai_model or config.default_model
+        user_info.preferred_model = user_info.preferred_model or config.default_model
         return UserWithKeys.model_validate(user_info)

@@ -14,13 +14,13 @@ from tests.evaluation.utils import MessagePair
 
 @pytest_asyncio.fixture
 async def user_info(client: TestClient) -> dict[str, str]:
-    user_in = {"name": "Farid", "openai_api_key": os.environ["OPENAI_API_KEY"]}
+    user_in = {"name": "Farid", "gemini_api_key": os.environ["GEMINI_API_KEY"]}
 
     if langsmith_api_key := os.environ.get("LANGCHAIN_API_KEY", None):
         user_in["langsmith_api_key"] = langsmith_api_key
 
-    if preferred_openai_model := os.environ.get("PREFERRED_OPENAI_MODEL", None):
-        user_in["preferred_openai_model"] = preferred_openai_model
+    if preferred_model := os.environ.get("PREFERRED_MODEL", None):
+        user_in["preferred_model"] = preferred_model
 
     response = client.patch("/settings/info", json=user_in)
     assert response.status_code == 200

@@ -11,10 +11,10 @@ class UserCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True, extra="ignore")
 
     name: Optional[str] = None
-    openai_api_key: Optional[str] = None
-    openai_base_url: str | None = None
+    gemini_api_key: Optional[str] = None
+    api_base_url: str | None = None
     langsmith_api_key: Optional[str] = None
-    preferred_openai_model: Optional[str] = None
+    preferred_model: Optional[str] = None
     sentry_enabled: Optional[bool] = True
     analytics_enabled: Optional[bool] = True
     hide_sql_preference: Optional[bool] = False
